@@ -1,0 +1,37 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.prime.com.tr/ui"
+	template="/style/templates/templateLogin.xhtml">
+
+	<ui:define name="content">
+
+		<h:form prependId="false" class="login active">
+
+			<h3>Autenticação</h3>
+			<p:messages id="mensagens" showDetail="true" showSummary="false" />
+
+			<div>
+				<h:outputLabel value="Login" />
+				<h:inputText id="j_username" size="15" />
+			</div>
+			<div>
+				<h:outputLabel value="Senha" />
+				<h:inputSecret id="j_password" size="15" />
+			</div>
+
+			<!--<a href="#" class="forgot linkform">Esqueceu sua senha?</a>-->
+			<div class="bottom">
+				<div class="remember">
+					<input type="checkbox" /><span>Mantenha-me logado</span>
+				</div>
+				<h:commandButton value="Entrar" action="#{loginView.logar}" />
+				<div class="clear"></div>
+			</div>
+
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,374 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.prime.com.tr/ui"
+	template="/style/templates/templateDefaultControl.xhtml">
+
+	<ui:define name="content">
+
+		<!-- Formulário Principal do controle de Usuários -->
+		<h:form id="formListUser"
+			style="width:90%;margin-left:5%;margin-right:5%;">
+			<p:growl id="messages" showDetail="true" />
+
+
+			<!-- Tabela Principal do controle de Usuários -->
+			<p:dataTable var="userVO" id="listUserVO"
+				emptyMessage="Lista de Funcionários vazia para os filtros selecionados"
+				widgetVar="usersTable" value="#{userBean.listUserVOInit}"
+				paginator="true" rows="11" selectionMode="single">
+				<f:facet name="header">
+					<!-- Botões de listar e adicionar dos Usuários -->
+					<p:commandButton value="Listar" icon="/images/application.ico"
+						actionListener="#{userBean.listAllUsers}" async="true"
+						update="formListUser" oncomplete="usersTable.filter()"
+						action="#{userBean.listUserCurrent}" />
+					<p:commandButton value="Adicionar" onclick="newDialogUser.show();"
+						async="true" update="listUserVO,formNewUser"
+						actionListener="#{userBean.listAllRolesSelectItem}" />
+					<p:spacer height="2" width="2%" />
+					<p:outputPanel>
+						<p:inputText id="globalFilter" onkeyup="usersTable.filter()"
+							style="width:200px" />
+					</p:outputPanel>
+				</f:facet>
+
+				<p:column sortBy="#{userVO.id}" filterBy="#{userVO.id}">
+					<f:facet name="header">
+						<h:outputText value="Id" />
+					</f:facet>
+					<h:outputText value="#{userVO.id}" />
+				</p:column>
+
+				<p:column sortBy="#{userVO.name}" filterBy="#{userVO.name}">
+					<f:facet name="header">
+						<h:outputText value="Nome" />
+					</f:facet>
+					<h:outputText value="#{userVO.name}" />
+				</p:column>
+
+				<p:column sortBy="#{userVO.cpf}" filterBy="#{userVO.cpf}">
+					<f:facet name="header">
+						<h:outputText value="CPF" />
+					</f:facet>
+					<h:outputText value="#{userVO.cpf}" />
+				</p:column>
+
+				<p:column sortBy="#{userVO.login}" filterBy="#{userVO.login}">
+					<f:facet name="header">
+						<h:outputText value="Login" />
+					</f:facet>
+					<h:outputText value="#{userVO.login}" />
+				</p:column>
+
+				<!-- <p:column sortBy="#{userVO.password}"
+					filterBy="#{userVO.password}">
+					<f:facet name="header">
+						<h:outputText value="Senha" />
+					</f:facet>
+					<h:outputText value="#{userVO.password}" />
+				</p:column> -->
+
+				<p:column sortBy="#{userVO.roleVO.description}"
+					filterOptions="#{userBean.rolesItensOpt}"
+					filterBy="#{userVO.roleVO.description}">
+					<f:facet name="header">
+						<h:outputText value="Permissão" />
+					</f:facet>
+					<h:outputText value="#{userVO.roleVO.description}" />
+				</p:column>
+
+				<!-- <p:column sortBy="#{userVO.remark}"
+					filterBy="#{userVO.remark}">
+					<f:facet name="header">
+						<h:outputText value="Observação" />
+					</f:facet>
+					<h:outputText value="#{userVO.remark}" />
+				</p:column> -->
+
+				<p:column>
+					<f:facet name="header">
+						<h:outputText value="Opções" />
+					</f:facet>
+
+					<p:commandLink async="true" update="formDetailsUser"
+						oncomplete="detailsDialogUser.show();">
+						<h:graphicImage value="/images/search.png" style="border:0;" />
+						<f:setPropertyActionListener value="#{userVO}"
+							target="#{userBean.userVO}" />
+					</p:commandLink>
+
+					<p:spacer width="10px" />
+					<p:commandLink async="true" update="formEditUser"
+						oncomplete="editDialogUser.show();"
+						actionListener="#{userBean.listAllRolesSelectItem}">
+						<h:graphicImage value="/images/edit.gif" style="border:0;" />
+						<f:setPropertyActionListener value="#{userVO}"
+							target="#{userBean.userVO}" />
+					</p:commandLink>
+
+					<p:spacer width="10px" />
+					<p:commandLink async="true" update="formDeleteUser"
+						oncomplete="deleteDialogUser.show();">
+						<h:graphicImage value="/images/delete.png" style="border:0;" />
+						<f:setPropertyActionListener value="#{userVO}"
+							target="#{userBean.userVO}" />
+					</p:commandLink>
+
+				</p:column>
+			</p:dataTable>
+		</h:form>
+
+
+		<!-- Painel de inserção de novos Usuários -->
+		<p:dialog header="Novo Funcionário" widgetVar="newDialogUser"
+			modal="true" width="550" fixedCenter="true" showEffect="explode"
+			hideEffect="explode">
+			<h:form id="formNewUser" prependId="false">
+
+				<h:panelGrid columns="2" columnClasses="label,value"
+					id="newTableUser" styleClass="grid">
+					<h:outputLabel for="name" value="Nome" />
+					<h:inputText id="name" value="#{userBean.newUserVO.name}"
+						style="width:425;" required="true"
+						requiredMessage="Nome do Funcionário obrigatório"
+						validatorMessage="Tamanho máximo do Nome: 50">
+						<f:validateLength maximum="50" />
+					</h:inputText>
+
+					<h:outputLabel for="cpf" value="CPF" />
+					<h:panelGrid columns="5" columnClasses="label,value"
+						id="newTableUserPanel" styleClass="grid">
+						<p:inputMask id="cpf" value="#{userBean.newUserVO.cpf}"
+							mask="999.999.999-99" />
+
+						<p:spacer width="8px" />
+						<h:outputLabel for="role" value="Permissão" />
+						<h:selectOneMenu id="role" style="width:150;"
+							value="#{userBean.newUserVO.roleVO}">
+							<f:converter converterId="entityConverter" />
+							<f:selectItems var="role" value="#{roleBean.listItens}" />
+						</h:selectOneMenu>
+						<p:commandButton id="roleButton" value="+"
+							onclick="newDialogRole.show();" async="true" />
+					</h:panelGrid>
+
+					<h:outputLabel for="login" value="Login" />
+					<h:panelGrid columns="4" columnClasses="label,value"
+						id="newTableUserPanel2" styleClass="grid">
+						<h:inputText id="login" value="#{userBean.newUserVO.login}"
+							required="true" requiredMessage="Login Obrigatório"
+							validatorMessage="Tamanho máximo do Login: 10">
+							<f:validateLength maximum="10" />
+						</h:inputText>
+
+						<p:spacer width="36px" />
+						<h:outputLabel for="password" value="Senha" />
+						<p:password id="password" inline="true"
+							value="#{userBean.newUserVO.password}" required="true"
+							requiredMessage="Senha Obrigatória"
+							validatorMessage="Tamanho máximo da Senha: 12">
+							<f:validateLength maximum="12" />
+						</p:password>
+					</h:panelGrid>
+
+					<h:outputLabel for="remark" value="Observação" />
+					<h:inputTextarea id="remark" value="#{userBean.newUserVO.remark}"
+						cols="51" rows="8"
+						validatorMessage="Tamanho máximo do campo Observação: 500">
+						<f:validateLength maximum="500" />
+					</h:inputTextarea>
+
+				</h:panelGrid>
+				<h:panelGrid columns="5" columnClasses="label,value"
+					id="newTableUserPanel3" styleClass="grid">
+					<p:spacer width="140px" height="1px" />
+					<p:commandButton value="Salvar" async="true"
+						onclick="confirmationNewUser.show()" />
+					<p:commandButton value="Resetar" type="reset" />
+					<p:commandButton value="Cancelar" update="formListUser"
+						oncomplete="newDialogUser.hide();" type="cancel" />
+					<p:spacer width="100px" height="1px" />
+				</h:panelGrid>
+				<p:confirmDialog message="Confirma a inserção da nova Permissão?"
+					showEffect="bounce" hideEffect="explode" header="Confirmação"
+					severity="alert" widgetVar="confirmationNewUser">
+					<p:commandButton value="Sim" async="true"
+						oncomplete="confirmationNewUser.hide(),newDialogUser.hide(),usersTable.filter()"
+						actionListener="#{userBean.saveUser}"
+						update="formListUser,messages" />
+					<p:commandButton value="Não" onclick="confirmationNewUser.hide()"
+						type="button" />
+				</p:confirmDialog>
+			</h:form>
+		</p:dialog>
+
+
+		<!-- Painel de Visualização de Usuários -->
+		<p:dialog header="Detalhes do Funcionário"
+			widgetVar="detailsDialogUser" modal="true" width="615"
+			fixedCenter="true" showEffect="explode" hideEffect="explode">
+			<h:form id="formDetailsUser">
+				<h:panelGrid id="detailsTableUser" columns="2" width="400px">
+					<h:outputText value="Id" />
+					<h:outputText value="#{userBean.userVO.id}" />
+
+					<h:outputText value="Nome" />
+					<h:outputText value="#{userBean.userVO.name}" />
+
+					<h:outputText value="CPF" />
+					<h:outputText value="#{userBean.userVO.cpf}" />
+
+					<h:outputText value="Login" />
+					<h:outputText value="#{userBean.userVO.login}" />
+
+					<h:outputText value="Senha" />
+					<h:outputText value="#{userBean.userVO.password}" />
+
+					<h:outputText value="Permissão" />
+					<h:outputText value="#{userBean.userVO.roleVO.description}" />
+
+					<h:outputText value="Observação" />
+					<h:outputText value="#{userBean.userVO.remark}" />
+
+				</h:panelGrid>
+				<p:commandButton async="true" update="formListUser" value="Fechar"
+					oncomplete="detailsDialogUser.hide();" />
+			</h:form>
+		</p:dialog>
+
+
+		<!-- Painel de Edição de Usuários -->
+		<p:dialog header="Edição de Funcionário" widgetVar="editDialogUser"
+			closeListener="#{userBean.listAllUsers}" onCloseUpdate="listUserVO"
+			modal="true" width="415" fixedCenter="true" showEffect="explode"
+			hideEffect="explode">
+
+			<h:form id="formEditUser">
+				<h:panelGrid columns="2" width="400px">
+
+					<h:outputText value="Id" />
+					<h:outputText id="id" style="width:150px;"
+						value="#{userBean.userVO.id}" />
+
+					<h:outputText value="Nome" />
+					<p:inplace editor="true">
+						<p:inputText id="name" value="#{userBean.userVO.name}"
+							required="true" label="text" style="width:150px;"
+							validatorMessage="Tamanho máximo do Nome: 50">
+							<f:validateLength maximum="50" />
+						</p:inputText>
+					</p:inplace>
+
+					<h:outputText value="CPF" />
+					<p:inplace editor="true">
+						<p:inputMask id="cpf" value="#{userBean.userVO.cpf}"
+							mask="999.999.999-99" />
+					</p:inplace>
+
+					<h:outputText value="Login" />
+					<p:inplace editor="true">
+						<p:inputText id="login" value="#{userBean.userVO.login}"
+							required="true" label="text" style="width:150px;"
+							requiredMessage="Login Obrigatório"
+							validatorMessage="Tamanho máximo do Login: 10">
+							<f:validateLength maximum="12" />
+						</p:inputText>
+					</p:inplace>
+
+					<h:outputText value="Permissão" />
+					<p:inplace editor="true">
+						<h:selectOneMenu id="role" value="#{userBean.userVO.roleVO}">
+							<f:converter converterId="entityConverter" />
+							<f:selectItems var="role" value="#{roleBean.listItens}" />
+						</h:selectOneMenu>
+					</p:inplace>
+
+					<h:outputText value="Observação" />
+					<p:inplace editor="true">
+						<p:inputTextarea id="remark" value="#{userBean.userVO.remark}"
+							style="width:250px;height:100px;" effectDuration="400" />
+					</p:inplace>
+
+				</h:panelGrid>
+				<p:commandButton actionListener="#{userBean.updateUser}"
+					async="true" update="formListUser" value="Alterar"
+					onsuccess="usersTable.filter()" oncomplete="editDialogUser.hide();" />
+				<p:commandButton async="true" update="formListUser" value="Cancelar"
+					onsuccess="usersTable.filter()" oncomplete="editDialogUser.hide();" />
+			</h:form>
+		</p:dialog>
+
+
+		<!-- Painel de remoção de Usuários -->
+		<p:confirmDialog header="Confirmação de Remoção"
+			widgetVar="deleteDialogUser" modal="true" width="415"
+			fixedCenter="true" showEffect="explode" hideEffect="explode"
+			severity="alert" message="Confirma remover a Permissão listada?">
+			<h:form id="formDeleteUser" prependId="false">
+				<h:panelGrid id="deleteTableUser" columns="2" width="400px">
+
+					<h:outputText value="Id" />
+					<h:outputText value="#{userBean.userVO.id}" />
+
+					<h:outputText value="Nome" />
+					<h:outputText value="#{userBean.userVO.name}" />
+
+					<h:outputText value="Observação" />
+					<h:outputText value="#{userBean.userVO.remark}" />
+
+				</h:panelGrid>
+
+				<p:commandButton value="Sim" actionListener="#{userBean.removeUser}"
+					update="formListUser" oncomplete="deleteDialogUser.hide();"
+					async="true" onsuccess="usersTable.filter()" />
+				<p:commandButton value="Não" onclick="deleteDialogUser.hide()"
+					type="button" />
+			</h:form>
+		</p:confirmDialog>
+
+
+		<!-- Painel de inserção de novas permissões -->
+		<p:dialog header="Nova Permissão" widgetVar="newDialogRole"
+			modal="true" width="615" fixedCenter="true" showEffect="explode"
+			hideEffect="explode">
+			<h:form id="formNewRole" prependId="false">
+
+				<h:panelGrid columns="2" columnClasses="label,value"
+					id="newTableRole" styleClass="grid">
+					<h:outputLabel for="nameRole" value="Nome" />
+					<h:inputText id="nameRole" value="#{roleBean.newRoleVO.name}"
+						required="true" requiredMessage="Nome da Permissão obrigatório"
+						validatorMessage="Tamanho máximo: 25">
+						<f:validateLength maximum="25" />
+					</h:inputText>
+
+					<h:inputText id="descriptionRole"
+						value="#{roleBean.newRoleVO.description}" required="true"
+						requiredMessage="Descrição da Permissão obrigatório"
+						validatorMessage="Tamanho máximo: 25">
+						<f:validateLength maximum="25" />
+					</h:inputText>
+
+					<h:outputLabel for="remarkRole" value="Observação" />
+					<h:inputTextarea id="remarkRole"
+						value="#{roleBean.newRoleVO.remark}" cols="50" rows="5"
+						validatorMessage="Tamanho máximo do campo Observação: 500">
+						<f:validateLength maximum="500" />
+					</h:inputTextarea>
+
+				</h:panelGrid>
+				<p:commandButton value="Salvar" async="true"
+					onclick="newDialogRole.hide()"
+					actionListener="#{userBean.saveRoleUser}"
+					update="newDialogUser,formListUser,role,messages" />
+				<p:commandButton value="Resetar" type="reset" />
+				<p:commandButton value="Cancelar" update="formListRole"
+					oncomplete="newDialogRole.hide();" type="cancel" />
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+
+</ui:composition>

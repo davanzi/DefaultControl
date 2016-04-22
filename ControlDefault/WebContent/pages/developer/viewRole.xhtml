@@ -1,0 +1,243 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.prime.com.tr/ui"
+	template="/style/templates/templateDefaultControl.xhtml">
+
+	<ui:define name="content">
+
+		<!-- Formulário Principal do controle de Permissôes -->
+		<h:form id="formListRole"
+			style="width:70%;margin-left:15%;margin-right:15%;">
+			<p:growl id="messages" showDetail="true" />
+
+			<!-- Tabela Principal do controle de Permissôes -->
+			<p:dataTable var="roleVO" id="listRoleVO"
+				emptyMessage="Lista de Permissões vazia para os filtros selecionados"
+				widgetVar="rolesTable" value="#{roleBean.listRoleVOInit}"
+				paginator="true" rows="11" selectionMode="single">
+				<f:facet name="header">
+
+					<!-- Botões de listar e adicionar das Permissôes -->
+					<p:commandButton value="Listar"
+						actionListener="#{roleBean.listAllRoles}" async="true"
+						update="formListRole" oncomplete="rolesTable.filter()" />
+					<p:commandButton value="Adicionar" onclick="newDialogRole.show();"
+						async="true" update="listRoleVO,formNewRole" />
+					<p:spacer height="2" width="2%" />
+					<p:outputPanel>
+						<p:inputText id="globalFilter" onkeyup="rolesTable.filter()"
+							style="width:200px" />
+					</p:outputPanel>
+				</f:facet>
+
+				<p:column sortBy="#{roleVO.id}" filterBy="#{roleVO.id}">
+					<f:facet name="header">
+						<h:outputText value="Id" />
+					</f:facet>
+					<h:outputText value="#{roleVO.id}" />
+				</p:column>
+
+				<p:column sortBy="#{roleVO.name}" filterBy="#{roleVO.name}">
+					<f:facet name="header">
+						<h:outputText value="Nome" />
+					</f:facet>
+					<h:outputText value="#{roleVO.name}" />
+				</p:column>
+
+				<p:column sortBy="#{roleVO.description}"
+					filterBy="#{roleVO.description}">
+					<f:facet name="header">
+						<h:outputText value="Descrição" />
+					</f:facet>
+					<h:outputText value="#{roleVO.description}" />
+				</p:column>
+
+				<p:column sortBy="#{roleVO.remark}" filterBy="#{roleVO.remark}">
+					<f:facet name="header">
+						<h:outputText value="Observação" />
+					</f:facet>
+					<h:outputText value="#{roleVO.remark}" />
+				</p:column>
+
+				<p:column>
+					<f:facet name="header">
+						<h:outputText value="Opções" />
+					</f:facet>
+
+					<p:commandLink async="true" update="formDetailsRole"
+						oncomplete="detailsDialogRole.show();">
+						<h:graphicImage value="/images/search.png" style="border:0;" />
+						<f:setPropertyActionListener value="#{roleVO}"
+							target="#{roleBean.roleVO}" />
+					</p:commandLink>
+
+					<p:spacer width="10px" />
+					<p:commandLink async="true" update="formEditRole"
+						oncomplete="editDialogRole.show();">
+						<h:graphicImage value="/images/edit.gif" style="border:0;" />
+						<f:setPropertyActionListener value="#{roleVO}"
+							target="#{roleBean.roleVO}" />
+					</p:commandLink>
+
+					<p:spacer width="10px" />
+					<p:commandLink async="true" update="formDeleteRole"
+						oncomplete="deleteDialogRole.show();">
+						<h:graphicImage value="/images/delete.png" style="border:0;" />
+						<f:setPropertyActionListener value="#{roleVO}"
+							target="#{roleBean.roleVO}" />
+					</p:commandLink>
+
+				</p:column>
+			</p:dataTable>
+		</h:form>
+
+		<!-- Painel de inserção de novas permissões -->
+		<p:dialog header="Nova Permissão" widgetVar="newDialogRole"
+			modal="true" width="615" fixedCenter="true" showEffect="explode"
+			hideEffect="explode">
+			<h:form id="formNewRole" prependId="false">
+
+				<h:panelGrid columns="2" columnClasses="label,value"
+					id="newTableRole" styleClass="grid">
+					<h:outputLabel for="name" value="Nome" />
+					<h:inputText id="name" value="#{roleBean.newRoleVO.name}"
+						required="true" requiredMessage="Nome da Permissão obrigatório"
+						validatorMessage="Tamanho máximo: 25">
+						<f:validateLength maximum="25" />
+					</h:inputText>
+
+					<h:outputLabel for="descriptionRole" value="Descrição" />
+					<h:inputText id="descriptionRole"
+						value="#{roleBean.newRoleVO.description}" required="true"
+						requiredMessage="Descrição da Permissão obrigatório"
+						validatorMessage="Tamanho máximo: 25">
+						<f:validateLength maximum="25" />
+					</h:inputText>
+
+					<h:outputLabel for="remark" value="Observação" />
+					<h:inputTextarea id="remark" value="#{roleBean.newRoleVO.remark}"
+						cols="50" rows="5"
+						validatorMessage="Tamanho máximo do campo Observação: 500">
+						<f:validateLength maximum="500" />
+					</h:inputTextarea>
+
+				</h:panelGrid>
+				<p:commandButton value="Salvar" async="true"
+					onclick="confirmationNewRole.show()" />
+				<p:commandButton value="Resetar" type="reset" />
+				<p:commandButton value="Cancelar" update="formListRole"
+					oncomplete="newDialogRole.hide();" type="cancel" />
+				<p:confirmDialog message="Confirma a inserção da nova Permissão?"
+					showEffect="bounce" hideEffect="explode" header="Confirmação"
+					severity="alert" widgetVar="confirmationNewRole">
+					<p:commandButton value="Sim" async="true"
+						oncomplete="confirmationNewRole.hide(),newDialogRole.hide(),rolesTable.filter()"
+						actionListener="#{roleBean.saveRole}"
+						update="formListRole,messages" />
+					<p:commandButton value="Não" onclick="confirmationNewRole.hide()"
+						type="button" />
+				</p:confirmDialog>
+			</h:form>
+		</p:dialog>
+
+		<!-- Painel de Visualização de permissões -->
+		<p:dialog header="Detalhes da Permissão" widgetVar="detailsDialogRole"
+			modal="true" width="415" fixedCenter="true" showEffect="explode"
+			hideEffect="explode">
+			<h:form id="formDetailsRole">
+				<h:panelGrid id="detailsTableRole" columns="2" width="400">
+					<h:outputText value="Id" />
+					<h:outputText value="#{roleBean.roleVO.id}" />
+
+					<h:outputText value="Nome" />
+					<h:outputText value="#{roleBean.roleVO.name}" />
+
+					<h:outputText value="Descrição" />
+					<h:outputText value="#{roleBean.roleVO.description}" />
+
+					<h:outputText value="Propriedades" />
+					<h:outputText value="#{roleBean.roleVO.remark}" />
+
+				</h:panelGrid>
+				<p:commandButton async="true" update="formListRole" value="Fechar"
+					oncomplete="detailsDialogRole.hide();" />
+			</h:form>
+		</p:dialog>
+
+		<!-- Painel de Edição de permissões -->
+		<p:dialog header="Edição de Permissão" widgetVar="editDialogRole"
+			closeListener="#{roleBean.listAllRoles}" onCloseUpdate="listRoleVO"
+			modal="true" width="415" fixedCenter="true" showEffect="explode"
+			hideEffect="explode">
+
+			<h:form id="formEditRole">
+				<h:panelGrid columns="2" width="400">
+
+					<h:outputText value="Id" />
+					<h:outputText id="id" style="width:150px;"
+						value="#{roleBean.roleVO.id}" />
+
+					<h:outputText value="Nome" />
+					<p:inplace editor="true">
+						<p:inputText id="name" value="#{roleBean.roleVO.name}"
+							required="true" label="text" style="width:150px;" />
+					</p:inplace>
+
+					<h:outputText value="Descrição" />
+					<p:inplace editor="true">
+						<p:inputText id="description"
+							value="#{roleBean.roleVO.description}" required="true"
+							label="text" style="width:150px;" />
+					</p:inplace>
+
+					<h:outputText value="Observação" />
+					<p:inplace editor="true">
+						<p:inputTextarea id="remark" value="#{roleBean.roleVO.remark}"
+							style="width:250px;height:100px;" effectDuration="400" />
+					</p:inplace>
+
+				</h:panelGrid>
+				<p:commandButton actionListener="#{roleBean.updateRole}"
+					action="#{userBean.listAllUsers}" async="true"
+					update="formListRole" value="Alterar"
+					onsuccess="rolesTable.filter()" oncomplete="editDialogRole.hide();" />
+				<p:commandButton async="true" update="formListRole" value="Cancelar"
+					onsuccess="rolesTable.filter()" oncomplete="editDialogRole.hide();" />
+			</h:form>
+		</p:dialog>
+
+		<!-- Painel de remoção de Permissão -->
+		<p:confirmDialog header="Confirmação de Remoção"
+			widgetVar="deleteDialogRole" modal="true" width="415"
+			fixedCenter="true" showEffect="explode" hideEffect="explode"
+			severity="alert"
+			message="Confirma remover a Permissão listada? Todos seus dependentes serão excluídos!">
+			<h:form id="formDeleteRole" prependId="false">
+				<h:panelGrid id="deleteTableRole" columns="2" width="400">
+
+					<h:outputText value="Id" />
+					<h:outputText value="#{roleBean.roleVO.id}" />
+
+					<h:outputText value="Nome" />
+					<h:outputText value="#{roleBean.roleVO.name}" />
+
+					<h:outputText value="Observação" />
+					<h:outputText value="#{roleBean.roleVO.remark}" />
+
+				</h:panelGrid>
+
+				<p:commandButton value="Sim" actionListener="#{roleBean.removeRole}"
+					action="#{userBean.listAllUsers}" update="formListRole"
+					oncomplete="deleteDialogRole.hide();" async="true"
+					onsuccess="rolesTable.filter()" />
+				<p:commandButton value="Não" onclick="deleteDialogRole.hide()"
+					type="button" />
+			</h:form>
+		</p:confirmDialog>
+
+
+	</ui:define>
+
+</ui:composition>
